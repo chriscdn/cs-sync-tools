@@ -104,7 +104,12 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
             "/"
           ),
           targetSRC: join(config.targetSRC, moduleName, "/"),
-          sourceSupport: join(config.sourceModules, moduleName, "support", "/"),
+          sourceSupport: join(
+            config.sourceModules,
+            sourceModule,
+            "support",
+            "/"
+          ),
           targetSupport: join(targetSupport, moduleName, "/"),
           sourceINI: join(sourceModuleDirectory, iniFileName),
           targetINI: join(config.targetSRC, moduleName, iniFileName),
