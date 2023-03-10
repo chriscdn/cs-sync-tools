@@ -34,8 +34,8 @@ function rsync(
     "desktop.ini",
   ]
 ): Promise<number | Error> {
-  const source2 = source.toLowerCase().replace("c:\\", "/cygdrive/c/");
-  const target2 = target.toLowerCase().replace("c:\\", "/cygdrive/c/");
+  const source2 = source.replace("c:\\", "/cygdrive/c/");
+  const target2 = target.replace("c:\\", "/cygdrive/c/");
 
   return new Promise((resolve, reject) => {
     new Rsync()
