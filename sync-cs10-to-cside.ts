@@ -58,7 +58,7 @@ function rsync(
 }
 
 type SyncConfig = {
-  sourceContentServer: string;
+  sourceModules: string;
   targetContentServer: string;
   targetSRC: string;
   rsyncExecutable: string;
@@ -69,10 +69,8 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
   const targetModules = join(config.targetContentServer, "module", "/");
   const targetSupport = join(config.targetContentServer, "support", "/");
 
-  const sourceModules = join(config.sourceContentServer, "module");
-
   const [allSourceModules, allTargetModules] = await Promise.all([
-    readDirectory(sourceModules),
+    readDirectory(config.sourceModules),
     readDirectory(targetModules),
   ]);
 
@@ -88,13 +86,23 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
       );
 
       if (sourceModule && targetModule) {
-        const sourceModuleDirectory = join(sourceModules, sourceModule, "/");
+        const sourceModuleDirectory = join(
+          config.sourceModules,
+          sourceModule,
+          "/"
+        );
         const targetModuleDirectory = join(targetModules, targetModule, "/");
 
         return {
           source: sourceModuleDirectory,
           target: targetModuleDirectory,
-          sourceSRC: join(sourceModules, sourceModule, "src", moduleName, "/"),
+          sourceSRC: join(
+            config.sourceModules,
+            sourceModule,
+            "src",
+            moduleName,
+            "/"
+          ),
           targetSRC: join(config.targetSRC, moduleName, "/"),
           sourceSupport: join(sourceModules, sourceModule, "support", "/"),
           targetSupport: join(targetSupport, moduleName, "/"),
