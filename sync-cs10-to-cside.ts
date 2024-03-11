@@ -49,6 +49,8 @@ function rsync(
     new Rsync()
       .executable(rsyncExecutable)
       .archive()
+      .owner("SYSTEM")
+      .group("SYSTEM")
       .exclude(exclude)
       .delete()
       .source(source2)
