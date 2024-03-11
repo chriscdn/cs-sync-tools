@@ -49,10 +49,9 @@ function rsync(
     new Rsync()
       .executable(rsyncExecutable)
       .archive()
-      .owner("SYSTEM")
-      .group("SYSTEM")
       .exclude(exclude)
       .delete()
+      .chmod(755)
       .source(source2)
       .destination(target2)
       .execute((error: Error, code: number, cmd: string) => {
