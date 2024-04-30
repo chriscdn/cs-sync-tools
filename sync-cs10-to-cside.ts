@@ -1,5 +1,5 @@
 import Rsync from "npm:rsync";
-import { join } from "https://deno.land/std@0.178.0/path/mod.ts";
+import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
 async function readDirectory(path: string): Promise<Array<string>> {
   const arr: Array<string> = [];
@@ -30,6 +30,7 @@ function rsync(
     "node_modules",
     ".git",
     ".gitignore",
+    ".gitattributes",
     ".DS_Store",
     "desktop.ini",
   ]
