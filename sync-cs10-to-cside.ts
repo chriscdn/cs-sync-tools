@@ -50,10 +50,11 @@ function rsync(
     new Rsync()
       .executable(rsyncExecutable)
       // .archive()
-      .flags("rt")
+      .flags("av")
       .exclude(exclude)
       .delete()
-      // .chmod(755)
+      .set("no-p")
+      .chmod("ugo=rwX")
       .source(source2)
       .destination(target2)
       .execute((error: Error, code: number, cmd: string) => {
