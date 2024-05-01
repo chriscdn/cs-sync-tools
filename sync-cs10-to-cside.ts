@@ -49,10 +49,11 @@ function rsync(
   return new Promise((resolve, reject) => {
     new Rsync()
       .executable(rsyncExecutable)
-      .archive()
+      // .archive()
+      .flags("rt")
       .exclude(exclude)
       .delete()
-      .chmod(755)
+      // .chmod(755)
       .source(source2)
       .destination(target2)
       .execute((error: Error, code: number, cmd: string) => {
