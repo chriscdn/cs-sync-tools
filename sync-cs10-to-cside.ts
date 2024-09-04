@@ -1,13 +1,13 @@
 import Rsync from "npm:rsync";
 import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
-async function readDirectory(path: string): Promise<Array<string>> {
+const readDirectory = async (path: string): Promise<Array<string>> => {
   const arr: Array<string> = [];
   for await (const entry of Deno.readDir(path)) arr.push(entry.name);
   return arr;
-}
+};
 
-async function pathExists(filename: string): Promise<boolean> {
+const pathExists = async (filename: string): Promise<boolean> => {
   try {
     await Deno.stat(filename);
     return true;
@@ -18,9 +18,9 @@ async function pathExists(filename: string): Promise<boolean> {
       throw error;
     }
   }
-}
+};
 
-function rsync(
+const rsync = (
   rsyncExecutable: string,
   source: string,
   target: string,
@@ -33,8 +33,8 @@ function rsync(
     ".gitattributes",
     ".DS_Store",
     "desktop.ini",
-  ]
-): Promise<number | Error> {
+  ],
+): Promise<number | Error> => {
   const source2 = source
     .replace("c:\\", "/cygdrive/c/")
     .replace("c:/", "/cygdrive/c/")
@@ -49,12 +49,12 @@ function rsync(
   return new Promise((resolve, reject) => {
     new Rsync()
       .executable(rsyncExecutable)
-      // .archive()
-      .flags("av")
+      // .flags("av")
       .exclude(exclude)
       .delete()
-      .set("no-p")
-      .chmod("ugo=rwX")
+      // .set("no-p")
+      // .chmod("ugo=rwX")
+      .flags("rltDv")
       .source(source2)
       .destination(target2)
       .execute((error: Error, code: number, cmd: string) => {
@@ -67,7 +67,7 @@ function rsync(
         }
       });
   });
-}
+};
 
 type SyncConfig = {
   sourceModules: string;
@@ -101,7 +101,7 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
         const sourceModuleDirectory = join(
           config.sourceModules,
           sourceModule,
-          "/"
+          "/",
         );
         const targetModuleDirectory = join(targetModules, targetModule, "/");
 
@@ -113,14 +113,14 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
             sourceModule,
             "src",
             moduleName,
-            "/"
+            "/",
           ),
           targetSRC: join(config.targetSRC, moduleName, "/"),
           sourceSupport: join(
             config.sourceModules,
             sourceModule,
             "support",
-            "/"
+            "/",
           ),
           targetSupport: join(targetSupport, moduleName, "/"),
           sourceINI: join(sourceModuleDirectory, iniFileName),
@@ -141,7 +141,7 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
       await rsync(
         config.rsyncExecutable,
         mapping!.sourceSRC,
-        mapping!.targetSRC
+        mapping!.targetSRC,
       );
     }
 
@@ -149,7 +149,7 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
       await rsync(
         config.rsyncExecutable,
         mapping!.sourceINI,
-        mapping!.targetINI
+        mapping!.targetINI,
       );
     }
 
@@ -157,7 +157,7 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
       await rsync(
         config.rsyncExecutable,
         mapping!.sourceSupport,
-        mapping!.targetSupport
+        mapping!.targetSupport,
       );
     }
   });
