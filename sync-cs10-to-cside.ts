@@ -1,9 +1,11 @@
-import Rsync from "npm:rsync";
 import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
+import robocopy from "npm:robocopy";
 
 const readDirectory = async (path: string): Promise<Array<string>> => {
   const arr: Array<string> = [];
-  for await (const entry of Deno.readDir(path)) arr.push(entry.name);
+  for await (const entry of Deno.readDir(path)) {
+    arr.push(entry.name);
+  }
   return arr;
 };
 
@@ -21,33 +23,49 @@ const pathExists = async (filename: string): Promise<boolean> => {
 };
 
 const rsync = (
-  rsyncExecutable: string,
   source: string,
   target: string,
-  exclude = [
+  excludeFiles = [
     "*.oll",
-    ".svn",
-    "node_modules",
-    ".git",
     ".gitignore",
     ".gitattributes",
     ".DS_Store",
     "desktop.ini",
   ],
+  excludeDirs = [
+    ".svn",
+    "node_modules",
+    ".git",
+  ],
 ): Promise<number | Error> => {
-  const source2 = source
-    .replace("c:\\", "/cygdrive/c/")
-    .replace("c:/", "/cygdrive/c/")
-    .replace("e:\\", "/cygdrive/e/")
-    .replace("e:/", "/cygdrive/e/");
-  const target2 = target
-    .replace("c:\\", "/cygdrive/c/")
-    .replace("c:/", "/cygdrive/c/")
-    .replace("e:\\", "/cygdrive/e/")
-    .replace("e:/", "/cygdrive/e/");
+  return robocopy({
+    source,
+    destination: target,
+    copy: {
+      mirror: true,
+      // fixSecurity:true,
+    },
+    file: {
+      excludeFiles,
+      excludeDirs,
+    },
+  });
+};
 
-  return new Promise((resolve, reject) => {
-    new Rsync()
+// const source2 = source
+//   .replace("c:\\", "/cygdrive/c/")
+//   .replace("c:/", "/cygdrive/c/")
+//   .replace("e:\\", "/cygdrive/e/")
+//   .replace("e:/", "/cygdrive/e/");
+// const target2 = target
+//   .replace("c:\\", "/cygdrive/c/")
+//   .replace("c:/", "/cygdrive/c/")
+//   .replace("e:\\", "/cygdrive/e/")
+//   .replace("e:/", "/cygdrive/e/");
+
+// return new Promise((resolve, reject) => {
+
+/* new Rsync()
       .executable(rsyncExecutable)
       // .flags("av")
       .exclude(exclude)
@@ -66,8 +84,9 @@ const rsync = (
           resolve(code);
         }
       });
-  });
-};
+      */
+// });
+// };
 
 type SyncConfig = {
   sourceModules: string;
@@ -77,7 +96,7 @@ type SyncConfig = {
   modules: Array<string>;
 };
 
-export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
+const SyncCS10ToCSIDE = async (config: SyncConfig) => {
   const targetModules = join(config.targetContentServer, "module", "/");
   const targetSupport = join(config.targetContentServer, "support", "/");
 
@@ -134,31 +153,27 @@ export default async function SynchronizeCS10ToCSIDE(config: SyncConfig) {
 
   mappings.forEach(async (mapping) => {
     if (await pathExists(mapping!.source)) {
-      await rsync(config.rsyncExecutable, mapping!.source, mapping!.target);
+      await rsync(mapping!.source, mapping!.target);
     }
 
     if (await pathExists(mapping!.sourceSRC)) {
       await rsync(
-        config.rsyncExecutable,
         mapping!.sourceSRC,
         mapping!.targetSRC,
       );
     }
 
     if (await pathExists(mapping!.sourceINI)) {
-      await rsync(
-        config.rsyncExecutable,
-        mapping!.sourceINI,
-        mapping!.targetINI,
-      );
+      await Deno.copyFile(mapping!.sourceINI, mapping!.targetINI);
     }
 
     if (await pathExists(mapping!.sourceSupport)) {
       await rsync(
-        config.rsyncExecutable,
         mapping!.sourceSupport,
         mapping!.targetSupport,
       );
     }
   });
-}
+};
+
+export { SyncCS10ToCSIDE };
