@@ -41,6 +41,7 @@ const rsync = (
   return robocopy({
     source,
     destination: target,
+    purge: true,
     copy: {
       mirror: true,
       // fixSecurity:true,
